@@ -7,7 +7,7 @@
     <title>Marqaz App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-     
+
 
 /* Button corner fix and touch enhancements */
 .btn {
@@ -617,78 +617,60 @@ z-index: -1;
 body.dark-mode .link-touch-active::after {
 background: rgba(255, 255, 255, 0.05);
 }
+
+
+.search-container {
+    display: flex;
+    gap: 10px;
+    flex-grow: 1;
+    justify-content: flex-end;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    font-size: 1rem;
+    transition: var(--transition);
+    color: var(--text-color);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-grow: 1;
+    justify-content: space-between;
+}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-content">
-                <h1> Sid Store  <i class="fas fa-images"></i></h1>
+                <h1> Sid Store  <i class="fas fa-images"></i></h1> <div class="search-container">
+            <input type="text" id="search-input" class="search-input" style="width:fillparentpx" placeholder="Search products...">
+            <button id="search-btn" class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+
             </div>
             <div class="theme-toggle" id="themeToggle">
                 <i class="fas fa-moon"></i>
             </div>
         </header>
         
-    <!-- Category Marquee -->
-    <div class="category-marquee">
-        <div class="marquee-content">
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=electronics">
-                    <i class="fas fa-microchip"></i>
-                    Electronics
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=clothing">
-                    <i class="fas fa-tshirt"></i>
-                    Clothing
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=books">
-                    <i class="fas fa-book"></i>
-                    Books
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=furniture">
-                    <i class="fas fa-couch"></i>
-                    Furniture
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=food">
-                    <i class="fas fa-utensils"></i>
-                    Food
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=sports">
-                    <i class="fas fa-running"></i>
-                    Sports
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=beauty">
-                    <i class="fas fa-spa"></i>
-                    Beauty
-                </a>
-            </div>
-            <div class="category-item">
-                <a href="/2025/07/homel.html?id=toys">
-                    <i class="fas fa-gamepad"></i>
-                    Toys
-                </a>
+        <!-- Category Marquee -->
+        <div class="category-marquee">
+            <div class="marquee-content" id="marquee-content">
+                <!-- Categories will be generated dynamically -->
             </div>
         </div>
-    </div>
 
-        <div class="search-container">
-            <input type="text" id="search-input" class="search-input" placeholder="Search products...">
-            <button id="search-btn" class="search-btn"><i class="fas fa-search"></i></button>
-        </div>
-
+       
         <div class="cards-container" id="cardsContainer">
             <div class="loading">
                 <div class="spinner"></div>
@@ -697,7 +679,8 @@ background: rgba(255, 255, 255, 0.05);
         </div>
 
         <footer>
-            <div class="footer-grid">
+            <!-- Footer content here -->
+  <div class="footer-grid">
                 <!-- Column 1 -->
                 <div class="footer-box">
                     <h3><i class="fas fa-store"></i> Sid Store</h3>
@@ -746,200 +729,253 @@ background: rgba(255, 255, 255, 0.05);
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Set current year
-            document.getElementById('year').textContent = new Date().getFullYear();
-            
-            // Theme toggle functionality
-            const themeToggle = document.getElementById('themeToggle');
-            const icon = themeToggle.querySelector('i');
-            
-            themeToggle.addEventListener('click', function() {
-                document.body.classList.toggle('dark-mode');
+    // Set current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const icon = themeToggle.querySelector('i');
+    
+    themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        
+        if (document.body.classList.contains('dark-mode')) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    });
+
+    // API Configuration
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPtt5U3y0VP-Fxg6yIw5MfBkEocQcZd-SWRq-s3x2mvtrlqHNwDkjpE9KWJq9hXjBCRIW5wdMUsh3g/pub?gid=0&single=true&output=tsv';
+
+    // Load data from Google Sheets
+    function loadData() {
+        const cardsContainer = document.getElementById('cardsContainer');
+        const loadingElement = cardsContainer.querySelector('.loading');
+        
+        fetch(SHEET_URL)
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.split('\n').slice(1); // Skip header row
+                const products = rows.map(row => {
+                    const columns = row.split('\t');
+                    return {
+                        name: columns[0],
+                        price: columns[1],
+                        detail: columns[2],
+                        url: columns[3],
+                        images: columns[4],
+                        id: columns[5],
+                        'sub-category': columns[6],
+                        'main-category': columns[7],
+                        rank: columns[8]
+                    };
+                });
+                generateCategories(products);
+                products.forEach((product, index) => {
+                    createProductCard(Object.values(product), index);
+                });
                 
-                if (document.body.classList.contains('dark-mode')) {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                }
+                // Hide the spinner after data has been loaded
+                loadingElement.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error fetching TSV data:', error);
+                loadingElement.textContent = 'Error loading data.';
             });
+    }
 
-            // API Configuration
-            const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPtt5U3y0VP-Fxg6yIw5MfBkEocQcZd-SWRq-s3x2mvtrlqHNwDkjpE9KWJq9hXjBCRIW5wdMUsh3g/pub?gid=0&single=true&output=tsv';
+    // Generate categories
+    function generateCategories(data) {
+        const categories = [...new Set(data.map(item => item['main-category']))];
+        const marqueeContent = document.querySelector('.marquee-content');
 
-            // Load data from Google Sheets
-            function loadData() {
-                fetch(SHEET_URL)
-                    .then(response => response.text())
-                    .then(data => {
-                        const rows = data.split('\n').slice(1); // Skip header row
-                        const cardsContainer = document.getElementById('cardsContainer');
-                        cardsContainer.innerHTML = ''; // Remove loading element
-                        
-                        rows.forEach((row, index) => {
-                            if (!row.trim()) return;
-                            
-                            try {
-                                const columns = row.split('\t');
-                                createProductCard(columns, index);
-                            } catch (error) {
-                                console.error(`Error processing row ${index + 1}:`, error);
-                            }
-                        });
-                    })
-                    .catch(error => console.error('Error fetching TSV data:', error));
-            }
+        categories.forEach(category => {
+            const categoryItem = document.createElement('div');
+            categoryItem.className = 'category-item';
+            categoryItem.innerHTML = `
+                <a href="#" class="category-link" data-category="${category}">
+                    ${category}
+                </a>
+            `;
+            marqueeContent.appendChild(categoryItem);
+        });
+
+        // Add event listener to category links
+        const categoryLinks = document.querySelectorAll('.category-link');
+        categoryLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const category = this.getAttribute('data-category');
+                filterProducts(category);
+            });
+        });
+    }
+
+    // Create product card element
+    function createProductCard(columns, index) {
+        const cardsContainer = document.getElementById('cardsContainer');
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        // Create image slider if images exist
+        let sliderHTML = '';
+        if (columns[4] && columns[4].startsWith('http')) {
+            const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
             
-            // Create product card element
-            function createProductCard(columns, index) {
-                const cardsContainer = document.getElementById('cardsContainer');
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                // Create image slider if images exist
-                let sliderHTML = '';
-                if (columns[4] && columns[4].startsWith('http')) {
-                    const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
-                    
-                    sliderHTML = `
-                        <div class="image-slider" id="slider-${index}">
-                            <div class="slides-container">
-                                ${imageUrls.map(url => `
-                                    <div class="slide" style="background-image: url('${url}')">
-                                        <div class="slide-content">
-                                            <div class="category">${columns[6]}</div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    sliderHTML = `
-                        <div class="image-slider">
-                            <div class="slides-container">
-                                <div class="slide" style="background: #eee; display: flex; justify-content: center; align-items: center;">
-                                    <i class="fas fa-image" style="font-size: 3rem; opacity: 0.3;"></i>
+            sliderHTML = `
+                <div class="image-slider" id="slider-${index}">
+                    <div class="slides-container">
+                        ${imageUrls.map(url => `
+                            <div class="slide" style="background-image: url('${url}')">
+                                <div class="slide-content">
+                                    <div class="category">${columns[6]}</div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                }
-                
-                // Create card HTML
-                card.innerHTML = `
-                    ${sliderHTML}
-                       <div class="card-body">
-                        <div class="card-meta">
-                            <span class="price">Rs: ${columns[1]}</span>
-                            <span class="timestamp">${columns[7]}</span>
-                        </div>
-                        <h3 class="card-title">${columns[0]}</h3>
-                        <p class="card-detail">${columns[2]}</p>
+                        `).join('')}
                     </div>
-                    
-                    <div class="card-footer">
-                        ${columns[3] && columns[3].startsWith('http') ? 
-                            `<a href="${columns[3]}" class="btn" target="_blank" rel="noopener noreferrer">
-                                <i class="fas fa-external-link-alt"></i> Visit
-                            </a>` : 
-                            '<span class="btn disabled"><i class="fas fa-unlink"></i> No Link</span>'
-                        }
-                        <a href="#" class="btn" onclick="filterProducts('${columns[6]}')">
-                            <i class="fas fa-tag"></i> ${columns[6]}
-                        </a>
+                </div>
+            `;
+        } else {
+            sliderHTML = `
+                <div class="image-slider">
+                    <div class="slides-container">
+                        <div class="slide" style="background: #eee; display: flex; justify-content: center; align-items: center;">
+                            <i class="fas fa-image" style="font-size: 3rem; opacity: 0.3;"></i>
+                        </div>
                     </div>
-                `;
-                
-                cardsContainer.appendChild(card);
-                
-                // Initialize auto-slider if images exist
-                if (columns[4] && columns[4].startsWith('http')) {
-                    const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
-                    if (imageUrls.length > 1) {
-                        initAutoSlider(`slider-${index}`, imageUrls.length);
-                    }
-                }
-            }
+                </div>
+            `;
+        }
+        
+        // Create card HTML
+        card.innerHTML = `
+            ${sliderHTML}
+            <div class="card-body">
+                <div class="card-meta">
+                    <span class="price">Rs: ${columns[1]}</span>
+                    <span class="timestamp">${columns[7]}</span>
+                </div>
+                <h3 class="card-title">${columns[0]}</h3>
+                <p class="card-detail">${columns[2]}</p>
+            </div>
             
-            // Auto-slider function
-            function initAutoSlider(sliderId, slideCount) {
-                const slider = document.getElementById(sliderId);
-                const slidesContainer = slider.querySelector('.slides-container');
-                let currentSlide = 0;
-                
-                // Clone first slide and append to end for infinite effect
-                const firstSlide = slidesContainer.children[0].cloneNode(true);
-                slidesContainer.appendChild(firstSlide);
-                
-                function nextSlide() {
-                    currentSlide = (currentSlide + 1) % slideCount;
-                    const offset = -currentSlide * 100;
-                    slidesContainer.style.transform = `translateX(${offset}%)`;
-                    
-                    // Reset position instantly when we reach the clone
-                    if (currentSlide === 0) {
-                        setTimeout(() => {
-                            slidesContainer.style.transition = 'none';
-                            slidesContainer.style.transform = 'translateX(0%)';
-                            setTimeout(() => {
-                                slidesContainer.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
-                            }, 10);
-                        }, 500);
-                    }
+            <div class="card-footer">
+                ${columns[3] && columns[3].startsWith('http') ? 
+                    `<a href="${columns[3]}" class="btn" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-external-link-alt"></i> Visit
+                    </a>` : 
+                    '<span class="btn disabled"><i class="fas fa-unlink"></i> No Link</span>'
                 }
-                
-                // Start auto-sliding (change slide every 3 seconds)
-                setInterval(nextSlide, 3000);
-            }
-            
-            // Search functionality
-            const searchInput = document.getElementById('search-input');
-            const searchBtn = document.getElementById('search-btn');
-
-            searchBtn.addEventListener('click', searchProducts);
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchProducts();
-                }
+                <a href="#" class="btn category-btn" data-category="${columns[6]}">
+                    <i class="fas fa-tag"></i> ${columns[6]}
+                </a>
+            </div>
+        `;
+        
+        cardsContainer.appendChild(card);
+        
+        // Add event listener to category buttons
+        const categoryBtns = card.querySelectorAll('.category-btn');
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function(event) {
+                event.preventDefault();
+                const category = this.getAttribute('data-category');
+                filterProducts(category);
             });
-
-            function searchProducts() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const cards = document.querySelectorAll('.card');
-
-                cards.forEach(card => {
-                    const title = card.querySelector('.card-title').textContent.toLowerCase();
-                    if (title.includes(searchTerm)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                const visibleCards = document.querySelectorAll('.card:not([style*="display: none"])');
-                if (visibleCards.length === 0) {
-                    const cardsContainer = document.getElementById('cardsContainer');
-                    cardsContainer.innerHTML = '<p>No products found.</p>';
-                }
-            }
-
-            function filterProducts(category) {
-                const cards = document.querySelectorAll('.card');
-                cards.forEach(card => {
-                    const cardCategory = card.querySelector('.card-footer .btn:nth-child(2)').textContent.trim().toLowerCase();
-                    if (cardCategory.includes(category.toLowerCase())) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Initial data load
-            loadData();
         });
+        
+        // Initialize auto-slider if images exist
+        if (columns[4] && columns[4].startsWith('http')) {
+            const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
+            if (imageUrls.length > 1) {
+                initAutoSlider(`slider-${index}`, imageUrls.length);
+            }
+        }
+    }
+
+    // Auto-slider function
+    function initAutoSlider(sliderId, slideCount) {
+        const slider = document.getElementById(sliderId);
+        const slidesContainer = slider.querySelector('.slides-container');
+        let currentSlide = 0;
+        
+        // Clone first slide and append to end for infinite effect
+        const firstSlide = slidesContainer.children[0].cloneNode(true);
+        slidesContainer.appendChild(firstSlide);
+        
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slideCount;
+            const offset = -currentSlide * 100;
+            slidesContainer.style.transform = `translateX(${offset}%)`;
+            
+            // Reset position instantly when we reach the clone
+            if (currentSlide === 0) {
+                setTimeout(() => {
+                    slidesContainer.style.transition = 'none';
+                    slidesContainer.style.transform = 'translateX(0%)';
+                    setTimeout(() => {
+                        slidesContainer.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    }, 10);
+                }, 500);
+            }
+        }
+        
+        // Start auto-sliding (change slide every 3 seconds)
+        setInterval(nextSlide, 3000);
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+
+    searchBtn.addEventListener('click', searchProducts);
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchProducts();
+        }
+    });
+
+    function searchProducts() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            if (title.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const visibleCards = document.querySelectorAll('.card:not([style*="display: none"])');
+        if (visibleCards.length === 0) {
+            const cardsContainer = document.getElementById('cardsContainer');
+            cardsContainer.innerHTML = '<p>No products found.</p>';
+        }
+    }
+
+function filterProducts(category) {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const cardCategory = card.querySelector('.timestamp').textContent.trim().toLowerCase();
+        const cardSubCategory = card.querySelector('.card-footer .category-btn').textContent.trim().toLowerCase();
+        
+        if (cardCategory.includes(category.toLowerCase()) || cardSubCategory.includes(category.toLowerCase())) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        } 
+    });
+}
+
+    // Initial data load
+    loadData();
+});
     </script>
 </body>
 </html>

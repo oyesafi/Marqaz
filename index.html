@@ -728,7 +728,7 @@ background: rgba(255, 255, 255, 0.05);
         </footer>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+     document.addEventListener('DOMContentLoaded', function() {
     // Set current year
     document.getElementById('year').textContent = new Date().getFullYear();
     
@@ -779,6 +779,10 @@ background: rgba(255, 255, 255, 0.05);
                     createProductCard(Object.values(product), index);
                 });
                 
+                if (products.length === 0) {
+                    cardsContainer.innerHTML = '<p>No products available.</p>';
+                }
+                
                 // Hide the spinner after data has been loaded
                 loadingElement.style.display = 'none';
             })
@@ -817,6 +821,11 @@ background: rgba(255, 255, 255, 0.05);
 
     // Create product card element
     function createProductCard(columns, index) {
+        // Check if product has required data
+        if (!columns[0] || !columns[1] || !columns[2]) {
+            return; // Skip empty products
+        }
+
         const cardsContainer = document.getElementById('cardsContainer');
         const card = document.createElement('div');
         card.className = 'card';
@@ -959,19 +968,19 @@ background: rgba(255, 255, 255, 0.05);
         }
     }
 
-function filterProducts(category) {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const cardCategory = card.querySelector('.timestamp').textContent.trim().toLowerCase();
-        const cardSubCategory = card.querySelector('.card-footer .category-btn').textContent.trim().toLowerCase();
-        
-        if (cardCategory.includes(category.toLowerCase()) || cardSubCategory.includes(category.toLowerCase())) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        } 
-    });
-}
+    function filterProducts(category) {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const cardCategory = card.querySelector('.timestamp').textContent.trim().toLowerCase();
+            const cardSubCategory = card.querySelector('.card-footer .category-btn').textContent.trim().toLowerCase();
+            
+            if (cardCategory.includes(category.toLowerCase()) || cardSubCategory.includes(category.toLowerCase())) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            } 
+        });
+    }
 
     // Initial data load
     loadData();

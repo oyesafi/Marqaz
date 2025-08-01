@@ -1,13 +1,9 @@
-
-
-
-
 <!--DOCTYPE html-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glass Card Viewer</title>
+    <title>Marqaz App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
 
@@ -747,110 +743,18 @@ body.dark-mode .link-touch-active::after {
             });
 
             // API Configuration
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPtt5U3y0VP-Fxg6yIw5MfBkEocQcZd-SWRq-s3x2mvtrlqHNwDkjpE9KWJq9hXjBCRIW5wdMUsh3g/pub?gid=0&single=true&output=tsv';
+            const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/your-spreadsheet-id/pub?gid=0&single=true&output=tsv';
 
-            // Get URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const category = urlParams.get('id');
-            const searchQuery = urlParams.get('search') || '';
-            
-            // Set search input value from URL
-            const searchInput = document.getElementById('search-input');
-            searchInput.value = searchQuery;
-            
-            // Update URL with search parameters
-            function updateURL(searchTerm = '') {
-                const params = new URLSearchParams();
-                if (category) params.set('id', category);
-                if (searchTerm) params.set('search', searchTerm);
-                
-                const newUrl = `${window.location.pathname}?${params.toString()}`;
-                window.history.pushState({ path: newUrl }, '', newUrl);
-            }
-            
-            // Search functionality
-            function performSearch() {
-                const searchTerm = searchInput.value.trim().toLowerCase();
-                updateURL(searchTerm);
-                filterProducts(searchTerm);
-            }
-            
-            // Search button click event
-            document.getElementById('search-btn').addEventListener('click', performSearch);
-            
-            // Search input enter key event
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    performSearch();
-                }
-            });
-            
-            // Filter products based on search term
-            function filterProducts(searchTerm = '') {
-                const cards = document.querySelectorAll('.card');
-                let hasResults = false;
-                
-                cards.forEach(card => {
-                    const title = card.querySelector('.card-title').textContent.toLowerCase();
-                    const detail = card.querySelector('.card-detail').textContent.toLowerCase();
-                    const category = card.querySelector('.category').textContent.toLowerCase();
-                    
-                    if (!searchTerm || 
-                        title.includes(searchTerm) || 
-                        detail.includes(searchTerm) || 
-                        category.includes(searchTerm)) {
-                        card.style.display = 'block';
-                        hasResults = true;
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-                
-                // Show no results message if no matches found
-                const noResults = document.getElementById('no-results');
-                if (noResults) {
-                    noResults.style.display = hasResults ? 'none' : 'block';
-                }
-            }
-            
             // Load data from Google Sheets
             function loadData() {
-                fetch(apiUrl)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Network response was not ok (Status: ${response.status})`);
-                        }
-                        return response.text();
-                    })
+                fetch(SHEET_URL)
+                    .then(response => response.text())
                     .then(data => {
                         const rows = data.split('\n').slice(1); // Skip header row
                         const cardsContainer = document.getElementById('cardsContainer');
                         cardsContainer.innerHTML = ''; // Remove loading element
                         
-                        if (rows.length === 0 || (rows.length === 1 && rows[0].trim() === '')) {
-                            showNoDataMessage();
-                            return;
-                        }
-                        
-                        let filteredProducts = rows;
-                        
-                        // Filter by category if specified in URL
-                        if (category) {
-                            filteredProducts = rows.filter(row => {
-                                if (!row.trim()) return false;
-                                const columns = row.split('\t');
-                                const productCategory = columns[4] ? columns[4].toLowerCase() : '';
-                                return productCategory.includes(category.toLowerCase());
-                            });
-                        }
-                        
-                        if (filteredProducts.length === 0) {
-                            showNoProductsMessage();
-                            return;
-                        }
-                        
-                        // Create cards for each product
-                        filteredProducts.forEach((row, index) => {
+                        rows.forEach((row, index) => {
                             if (!row.trim()) return;
                             
                             try {
@@ -860,16 +764,8 @@ body.dark-mode .link-touch-active::after {
                                 console.error(`Error processing row ${index + 1}:`, error);
                             }
                         });
-                        
-                        // Apply search filter if there's a search query
-                        if (searchQuery) {
-                            filterProducts(searchQuery);
-                        }
                     })
-                    .catch(error => {
-                        console.error('Error fetching TSV data:', error);
-                        showErrorMessage(error);
-                    });
+                    .catch(error => console.error('Error fetching TSV data:', error));
             }
             
             // Create product card element
@@ -880,8 +776,8 @@ body.dark-mode .link-touch-active::after {
                 
                 // Create image slider if images exist
                 let sliderHTML = '';
-                if (columns[6] && columns[6].startsWith('http')) {
-                    const imageUrls = columns[6].split(',').map(url => url.trim()).filter(url => url);
+                if (columns[4] && columns[4].startsWith('http')) {
+                    const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
                     
                     sliderHTML = `
                         <div class="image-slider" id="slider-${index}">
@@ -889,7 +785,7 @@ body.dark-mode .link-touch-active::after {
                                 ${imageUrls.map(url => `
                                     <div class="slide" style="background-image: url('${url}')">
                                         <div class="slide-content">
-                                            <div class="category">${columns[4] || 'Uncategorized'}</div>
+                                            <div class="category">${columns[6]}</div>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -912,22 +808,22 @@ body.dark-mode .link-touch-active::after {
                 card.innerHTML = `
                     ${sliderHTML}
                     <div class="card-body">
-                        <h3 class="card-title">${columns[1] || 'Untitled'}</h3>
-                        <p class="card-detail">${columns[2] || 'No description available'}</p>
+                        <h3 class="card-title">${columns[0]}</h3>
+                        <p class="card-detail">${columns[2]}</p>
                         <div class="card-meta">
-                            <span class="price">${columns[3] ? `Rs: ${columns[3]}` : 'N/A'}</span>
-                            <span class="timestamp">${columns[0] || ''}</span>
+                            <span class="price">Rs: ${columns[1]}</span>
+                            <span class="timestamp">${columns[7]}</span>
                         </div>
                     </div>
                     <div class="card-footer">
-                        ${columns[5] && columns[5].startsWith('http') ? 
-                            `<a href="${columns[5]}" class="btn" target="_blank" rel="noopener noreferrer">
+                        ${columns[3] && columns[3].startsWith('http') ? 
+                            `<a href="${columns[3]}" class="btn" target="_blank" rel="noopener noreferrer">
                                 <i class="fas fa-external-link-alt"></i> Visit
                             </a>` : 
                             '<span class="btn disabled"><i class="fas fa-unlink"></i> No Link</span>'
                         }
-                        <a href="/2025/07/homel.html?id=${columns[4]}" class="btn">
-                            <i class="fas fa-tag"></i> ${columns[4] || 'Uncategorized'}
+                        <a href="#" class="btn">
+                            <i class="fas fa-tag"></i> ${columns[6]}
                         </a>
                     </div>
                 `;
@@ -935,8 +831,8 @@ body.dark-mode .link-touch-active::after {
                 cardsContainer.appendChild(card);
                 
                 // Initialize auto-slider if images exist
-                if (columns[6] && columns[6].startsWith('http')) {
-                    const imageUrls = columns[6].split(',').map(url => url.trim()).filter(url => url);
+                if (columns[4] && columns[4].startsWith('http')) {
+                    const imageUrls = columns[4].split(',').map(url => url.trim()).filter(url => url);
                     if (imageUrls.length > 1) {
                         initAutoSlider(`slider-${index}`, imageUrls.length);
                     }
@@ -974,89 +870,9 @@ body.dark-mode .link-touch-active::after {
                 setInterval(nextSlide, 3000);
             }
             
-            // Show error message
-            function showErrorMessage(error) {
-                const cardsContainer = document.getElementById('cardsContainer');
-                cardsContainer.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Error loading data. Please try again later.</p>
-                        <p class="error-detail">${error.message}</p>
-                        <button class="retry-btn" id="retry-btn">Retry</button>
-                    </div>
-                `;
-                
-                // Add retry functionality
-                document.getElementById('retry-btn').addEventListener('click', loadData);
-            }
-            
-            // Show no data message
-            function showNoDataMessage() {
-                const cardsContainer = document.getElementById('cardsContainer');
-                cardsContainer.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-database" style="font-size: 3rem; opacity: 0.5;"></i>
-                        <p>No data available in the database.</p>
-                    </div>
-                `;
-            }
-            
-            // Show no products message for category
-            function showNoProductsMessage() {
-                const cardsContainer = document.getElementById('cardsContainer');
-                cardsContainer.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.5;"></i>
-                        <p>No products found in this category.</p>
-                        <a href="index.html" class="btn" style="margin-top: 15px;">
-                            <i class="fas fa-arrow-left"></i> View All Products
-                        </a>
-                    </div>
-                `;
-            }
-            
             // Initial data load
             loadData();
         });
-
-
-
-// Add this to your existing event listeners
-document.querySelectorAll('.btn').forEach(button => {
-  button.addEventListener('touchstart', function() {
-    this.classList.add('touch-active');
-  });
-  
-  button.addEventListener('touchend', function() {
-    this.classList.remove('touch-active');
-  });
-  
-  // Fix for touch devices that don't fire :active
-  button.addEventListener('touchcancel', function() {
-    this.classList.remove('touch-active');
-  });
-});
-
-
-
-
-// Add touch feedback for links
-document.querySelectorAll('i').forEach(link => {
-  link.addEventListener('touchstart', function() {
-    this.classList.add('link-touch-active');
-  });
-  
-  ['touchend', 'touchcancel'].forEach(evt => {
-    link.addEventListener(evt, function() {
-      this.classList.remove('link-touch-active');
-    });
-  });
-});
-
-
     </script>
 </body>
 </html>
-
-
-

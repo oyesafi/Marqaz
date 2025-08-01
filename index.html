@@ -829,15 +829,15 @@ background: rgba(255, 255, 255, 0.05);
                 // Create card HTML
                 card.innerHTML = `
                     ${sliderHTML}
-                    <div class="card-body">
-                  <div class="card-meta">
-                  <span class="price">Rs: ${columns[1]}</span>
-                  <span class="timestamp">${columns[7]}</span>
+                       <div class="card-body">
+                        <div class="card-meta">
+                            <span class="price">Rs: ${columns[1]}</span>
+                            <span class="timestamp">${columns[7]}</span>
                         </div>
                         <h3 class="card-title">${columns[0]}</h3>
                         <p class="card-detail">${columns[2]}</p>
-
                     </div>
+                    
                     <div class="card-footer">
                         ${columns[3] && columns[3].startsWith('http') ? 
                             `<a href="${columns[3]}" class="btn" target="_blank" rel="noopener noreferrer">

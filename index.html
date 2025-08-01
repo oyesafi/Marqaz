@@ -1,0 +1,1055 @@
+<!--DOCTYPE html-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glass Card Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+
+/* Button corner fix and touch enhancements */
+.btn {
+  position: relative; /* Needed for the pseudo-element */
+  overflow: hidden; /* Keeps the ripple effect contained */
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Fix for visible corners during touch */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Touch active state */
+.btn:active::after,
+.btn.touch-active::after {
+  background: rgba(0, 0, 0, 0.1); /* Subtle black overlay */
+}
+
+/* Dark mode adjustment */
+body.dark-mode .btn:active::after,
+body.dark-mode .btn.touch-active::after {
+  background: rgba(255, 255, 255, 0.1); /* Subtle white overlay */
+}
+
+/* Press effect */
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Disable default tap highlight */
+.btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Base Variables */
+:root {
+  --primary-color: #000000; /* Black for non-button elements */
+  --primary-hover: #333333;
+  --text-color: #000000;
+  --text-light: #777777;
+  --bg-color: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-text: #000000;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.2);
+  --transition: all 0.3s ease;
+  --glass-blur: 10px;
+  
+  /* Button-specific colors */
+  --button-primary: orange;
+  --button-hover: maroon;
+}
+body {user-select: none; }
+/* Dark Mode Variables */
+body.dark-mode {
+  --primary-color: #ffffff;
+  --primary-hover: #dddddd;
+  --text-color: #ffffff;
+  --text-light: #aaaaaa;
+  --bg-color: #000000;
+  --card-bg: rgba(30, 30, 30, 0.9);
+  --card-text: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Card Styles - Grayscale with theme toggle */
+.card {
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: var(--transition);
+  color: var(--card-text);
+}
+
+.card-body {
+  padding: 20px;
+  color: var(--card-text);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: var(--card-text);
+}
+
+.card-detail {
+  margin-bottom: 15px;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+/* Image grayscale effect */
+.image-slider {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.slide {
+  min-width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  
+  transition: filter 0.3s ease;
+}
+
+.card:hover .slide {
+  filter: grayscale(80%);
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 20px;
+  transition: var(--transition);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header Styles */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+h1 {
+  font-size: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  padding: 15px 25px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  margin: 0;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+
+position: fixed;
+    bottom: 25px;
+    right: 25px;
+    osition: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: var(--primary-color);
+    color: white;
+    border: 15px; 
+    z-index: 100;
+    
+
+
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+  color: var(--text-color);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.05);
+}
+
+/* Marquee Styles */
+.category-marquee {
+  background: var(--bg-color);
+  color: var(--text-color);
+  padding: 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee 30s linear infinite;
+}
+
+.category-item {
+  display: inline-block;
+  margin-right: 40px;
+  font-size: 1rem;
+}
+
+.category-item a {
+  color: var(--text-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.category-item a:hover {
+  transform: translateY(-2px);
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Search Container */
+.search-container {
+  margin-bottom: 30px;
+  display: flex;
+  gap: 10px;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 12px 20px;
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  font-size: 1rem;
+  transition: var(--transition);
+  color: var(--text-color);
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.search-btn {
+  padding: 12px 20px;
+  border-radius: 15px;
+  background: var(--button-primary);
+  color: var(--bg-color);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  background: var(--button-hover);
+}
+
+/* Cards Container */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.image-slider {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.slides-container {
+  display: flex;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide {
+  min-width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+
+.slide-content {
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  color: white;
+  padding: 15px;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.price {
+  font-weight: bold;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.category {
+  background: rgba(255, 255, 255, 0.3);
+  padding: 3px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  color: var(--text-color);
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Button Styles */
+.btn {
+  padding: 8px 15px;
+  border-radius: 8px;
+  background: var(--button-primary);
+  color: var(--bg-color);
+  text-decoration: none;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  background: var(--button-hover);
+}
+
+.btn.disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none;
+}
+
+/* Loading States */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  grid-column: 1 / -1;
+  color: var(--text-color);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid var(--text-color);
+  animation: spin 1s linear infinite;
+  margin-right: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Footer Styles */
+footer {
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: 15px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-box {
+  padding: 15px;
+}
+
+.footer-box h3 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-color);
+}
+
+.footer-box ul {
+  list-style: none;
+}
+
+.footer-box li {
+  margin-bottom: 12px;
+}
+
+.footer-box a {
+  color: var(--text-light);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.footer-box a:hover {
+  color: var(--text-color);
+  transform: translateX(5px);
+}
+
+.copyright {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-light);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.8rem;
+    padding: 10px 15px;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .image-slider {
+    height: 200px;
+  }
+  
+  .theme-toggle {
+    width: 50px;
+    height: 50px;
+  }
+
+  header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .cards-container {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-container {
+    flex-direction: column;
+  }
+
+  .search-btn {
+    justify-content: center;
+  }
+}
+
+marquee {
+  color: var(--card-text);}
+
+
+/* Touch active state for links */
+.link-touch-active {
+  position: relative;
+}
+
+.link-touch-active::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  z-index: -1;
+}
+
+body.dark-mode .link-touch-active::after {
+  background: rgba(255, 255, 255, 0.05);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1> Sid Store  <i class="fas fa-images"></i></h1>
+            </div>
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </header>
+        
+    <!-- Category Marquee -->
+    <div class="category-marquee">
+        <div class="marquee-content">
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=electronics">
+                    <i class="fas fa-microchip"></i>
+                    Electronics
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=clothing">
+                    <i class="fas fa-tshirt"></i>
+                    Clothing
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=books">
+                    <i class="fas fa-book"></i>
+                    Books
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=furniture">
+                    <i class="fas fa-couch"></i>
+                    Furniture
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=food">
+                    <i class="fas fa-utensils"></i>
+                    Food
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=sports">
+                    <i class="fas fa-running"></i>
+                    Sports
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=beauty">
+                    <i class="fas fa-spa"></i>
+                    Beauty
+                </a>
+            </div>
+            <div class="category-item">
+                <a href="/2025/07/homel.html?id=toys">
+                    <i class="fas fa-gamepad"></i>
+                    Toys
+                </a>
+            </div>
+        </div>
+    </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Search products...">
+            <button id="search-btn" class="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="cards-container" id="cardsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                Loading data...
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-grid">
+                <!-- Column 1 -->
+                <div class="footer-box">
+                    <h3><i class="fas fa-store"></i> Sid Store</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Find a Store</a></li>
+                        <li><a href="#"><i class="fas fa-box-open"></i> Our Products</a></li>
+                        <li><a href="#"><i class="fas fa-tag"></i> Special Offers</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 2 -->
+                <div class="footer-box">
+                    <h3><i class="fas fa-headset"></i> Support<br>&#8206;&#8206;&#8206; </h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                        <li><a href="#"><i class="fas fa-shipping-fast"></i> Order Tracking</a></li>
+                        <li><a href="#"><i class="fas fa-exchange-alt"></i> Returns</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 3 -->
+                <div class="footer-box">
+                    <h3><i class="fas fa-file-contract"></i> Legal</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-lock"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-signature"></i> Terms of Service</a></li>
+                        <li><a href="#"><i class="fas fa-cookie"></i> Cookie Policy</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Column 4 -->
+                <div class="footer-box">
+                    <h3><i class="fas fa-share-alt"></i> Connect</h3>
+                    <ul>
+                        <li><a href="#"><i class="fab fa-instagram"></i> Instagram<br> &#8206;</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter<br>&#8206;</a></li>
+                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                    </ul>
+                </div>
+                
+                <div class="copyright">
+                    <i class="far fa-copyright"></i> <span id="year"></span> Sid Store. All Rights Reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current year
+            document.getElementById('year').textContent = new Date().getFullYear();
+            
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const icon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+
+            // API Configuration
+            const apiUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8mJiM7TWE7_uRULLUU19_zQVlJTZrJCip-2StY-nyoIYFqLHQU3WGKBpkQCIn2iveObh7veINpeYw/pub?output=tsv';
+            
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const category = urlParams.get('id');
+            const searchQuery = urlParams.get('search') || '';
+            
+            // Set search input value from URL
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = searchQuery;
+            
+            // Update URL with search parameters
+            function updateURL(searchTerm = '') {
+                const params = new URLSearchParams();
+                if (category) params.set('id', category);
+                if (searchTerm) params.set('search', searchTerm);
+                
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            }
+            
+            // Search functionality
+            function performSearch() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                updateURL(searchTerm);
+                filterProducts(searchTerm);
+            }
+            
+            // Search button click event
+            document.getElementById('search-btn').addEventListener('click', performSearch);
+            
+            // Search input enter key event
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // Filter products based on search term
+            function filterProducts(searchTerm = '') {
+                const cards = document.querySelectorAll('.card');
+                let hasResults = false;
+                
+                cards.forEach(card => {
+                    const title = card.querySelector('.card-title').textContent.toLowerCase();
+                    const detail = card.querySelector('.card-detail').textContent.toLowerCase();
+                    const category = card.querySelector('.category').textContent.toLowerCase();
+                    
+                    if (!searchTerm || 
+                        title.includes(searchTerm) || 
+                        detail.includes(searchTerm) || 
+                        category.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        hasResults = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Show no results message if no matches found
+                const noResults = document.getElementById('no-results');
+                if (noResults) {
+                    noResults.style.display = hasResults ? 'none' : 'block';
+                }
+            }
+            
+            // Load data from Google Sheets
+            function loadData() {
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok (Status: ${response.status})`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        const rows = data.split('\n').slice(1); // Skip header row
+                        const cardsContainer = document.getElementById('cardsContainer');
+                        cardsContainer.innerHTML = ''; // Remove loading element
+                        
+                        if (rows.length === 0 || (rows.length === 1 && rows[0].trim() === '')) {
+                            showNoDataMessage();
+                            return;
+                        }
+                        
+                        let filteredProducts = rows;
+                        
+                        // Filter by category if specified in URL
+                        if (category) {
+                            filteredProducts = rows.filter(row => {
+                                if (!row.trim()) return false;
+                                const columns = row.split('\t');
+                                const productCategory = columns[4] ? columns[4].toLowerCase() : '';
+                                return productCategory.includes(category.toLowerCase());
+                            });
+                        }
+                        
+                        if (filteredProducts.length === 0) {
+                            showNoProductsMessage();
+                            return;
+                        }
+                        
+                        // Create cards for each product
+                        filteredProducts.forEach((row, index) => {
+                            if (!row.trim()) return;
+                            
+                            try {
+                                const columns = row.split('\t');
+                                createProductCard(columns, index);
+                            } catch (error) {
+                                console.error(`Error processing row ${index + 1}:`, error);
+                            }
+                        });
+                        
+                        // Apply search filter if there's a search query
+                        if (searchQuery) {
+                            filterProducts(searchQuery);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching TSV data:', error);
+                        showErrorMessage(error);
+                    });
+            }
+            
+            // Create product card element
+            function createProductCard(columns, index) {
+                const cardsContainer = document.getElementById('cardsContainer');
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Create image slider if images exist
+                let sliderHTML = '';
+                if (columns[6] && columns[6].startsWith('http')) {
+                    const imageUrls = columns[6].split(',').map(url => url.trim()).filter(url => url);
+                    
+                    sliderHTML = `
+                        <div class="image-slider" id="slider-${index}">
+                            <div class="slides-container">
+                                ${imageUrls.map(url => `
+                                    <div class="slide" style="background-image: url('${url}')">
+                                        <div class="slide-content">
+                                            <div class="category">${columns[4] || 'Uncategorized'}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    sliderHTML = `
+                        <div class="image-slider">
+                            <div class="slides-container">
+                                <div class="slide" style="background: #eee; display: flex; justify-content: center; align-items: center;">
+                                    <i class="fas fa-image" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Create card HTML
+                card.innerHTML = `
+                    ${sliderHTML}
+                    <div class="card-body">
+                        <h3 class="card-title">${columns[1] || 'Untitled'}</h3>
+                        <p class="card-detail">${columns[2] || 'No description available'}</p>
+                        <div class="card-meta">
+                            <span class="price">${columns[3] ? `Rs: ${columns[3]}` : 'N/A'}</span>
+                            <span class="timestamp">${columns[0] || ''}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        ${columns[5] && columns[5].startsWith('http') ? 
+                            `<a href="${columns[5]}" class="btn" target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-external-link-alt"></i> Visit
+                            </a>` : 
+                            '<span class="btn disabled"><i class="fas fa-unlink"></i> No Link</span>'
+                        }
+                        <a href="/2025/07/homel.html?id=${columns[4]}" class="btn">
+                            <i class="fas fa-tag"></i> ${columns[4] || 'Uncategorized'}
+                        </a>
+                    </div>
+                `;
+                
+                cardsContainer.appendChild(card);
+                
+                // Initialize auto-slider if images exist
+                if (columns[6] && columns[6].startsWith('http')) {
+                    const imageUrls = columns[6].split(',').map(url => url.trim()).filter(url => url);
+                    if (imageUrls.length > 1) {
+                        initAutoSlider(`slider-${index}`, imageUrls.length);
+                    }
+                }
+            }
+            
+            // Auto-slider function
+            function initAutoSlider(sliderId, slideCount) {
+                const slider = document.getElementById(sliderId);
+                const slidesContainer = slider.querySelector('.slides-container');
+                let currentSlide = 0;
+                
+                // Clone first slide and append to end for infinite effect
+                const firstSlide = slidesContainer.children[0].cloneNode(true);
+                slidesContainer.appendChild(firstSlide);
+                
+                function nextSlide() {
+                    currentSlide = (currentSlide + 1) % slideCount;
+                    const offset = -currentSlide * 100;
+                    slidesContainer.style.transform = `translateX(${offset}%)`;
+                    
+                    // Reset position instantly when we reach the clone
+                    if (currentSlide === 0) {
+                        setTimeout(() => {
+                            slidesContainer.style.transition = 'none';
+                            slidesContainer.style.transform = 'translateX(0%)';
+                            setTimeout(() => {
+                                slidesContainer.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                            }, 10);
+                        }, 500);
+                    }
+                }
+                
+                // Start auto-sliding (change slide every 3 seconds)
+                setInterval(nextSlide, 3000);
+            }
+            
+            // Show error message
+            function showErrorMessage(error) {
+                const cardsContainer = document.getElementById('cardsContainer');
+                cardsContainer.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading data. Please try again later.</p>
+                        <p class="error-detail">${error.message}</p>
+                        <button class="retry-btn" id="retry-btn">Retry</button>
+                    </div>
+                `;
+                
+                // Add retry functionality
+                document.getElementById('retry-btn').addEventListener('click', loadData);
+            }
+            
+            // Show no data message
+            function showNoDataMessage() {
+                const cardsContainer = document.getElementById('cardsContainer');
+                cardsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-database" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p>No data available in the database.</p>
+                    </div>
+                `;
+            }
+            
+            // Show no products message for category
+            function showNoProductsMessage() {
+                const cardsContainer = document.getElementById('cardsContainer');
+                cardsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-box-open" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p>No products found in this category.</p>
+                        <a href="index.html" class="btn" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-left"></i> View All Products
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // Initial data load
+            loadData();
+        });
+
+
+
+// Add this to your existing event listeners
+document.querySelectorAll('.btn').forEach(button => {
+  button.addEventListener('touchstart', function() {
+    this.classList.add('touch-active');
+  });
+  
+  button.addEventListener('touchend', function() {
+    this.classList.remove('touch-active');
+  });
+  
+  // Fix for touch devices that don't fire :active
+  button.addEventListener('touchcancel', function() {
+    this.classList.remove('touch-active');
+  });
+});
+
+
+
+
+// Add touch feedback for links
+document.querySelectorAll('i').forEach(link => {
+  link.addEventListener('touchstart', function() {
+    this.classList.add('link-touch-active');
+  });
+  
+  ['touchend', 'touchcancel'].forEach(evt => {
+    link.addEventListener(evt, function() {
+      this.classList.remove('link-touch-active');
+    });
+  });
+});
+
+
+    </script>
+</body>
+</html>

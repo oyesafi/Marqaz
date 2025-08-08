@@ -7,7 +7,7 @@ Curated collection of gently used items
 User-friendly interface for easy browsing and purchasing
 Sustainable and affordable alternative to fast fashion
 <h1>Live Demo</h1>
-Check out the live demo of Marqaz: [![Marqaz](https://img.shields.io/badge/Marqaz-Visit-green)](https://oyesafi.github.io/Marqaz/)
+[![Marqaz](https://img.shields.io/badge/Marqaz-Visit-green)](https://oyesafi.github.io/Marqaz/)
 <h1>Contributing</h1>
 Contributions are welcome! If you'd like to contribute to Marqaz, please fork the repository and submit a pull request.
 <h1>Contact</h1>

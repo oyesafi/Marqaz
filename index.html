@@ -985,6 +985,48 @@ background: rgba(255, 255, 255, 0.05);
     // Initial data load
     loadData();
 });
+                
+        // Show clear filter button
+        const clearFilterBtn = document.getElementById('clear-filter-btn');
+        if (!clearFilterBtn) {
+            const btn = document.createElement('button');
+            btn.id = 'clear-filter-btn';
+            btn.textContent = 'Show All';
+            btn.onclick = function() {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                btn.style.display = 'none';
+            };
+            document.body.appendChild(btn);
+        } else {
+            clearFilterBtn.style.display = 'block';
+        }
+    }
+        
+        // Show clear filter button
+        const clearFilterBtn = document.getElementById('clear-filter-btn');
+        if (!clearFilterBtn) {
+            const btn = document.createElement('button');
+            btn.id = 'clear-filter-btn';
+            btn.textContent = 'Clear Filter';
+            btn.onclick = function() {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                btn.style.display = 'none';
+            };
+            document.body.appendChild(btn);
+        } else {
+            clearFilterBtn.style.display = 'block';
+        }
+    }
+
+    // Initial data load
+    loadData();
+});
     </script>
 </body>
 </html>

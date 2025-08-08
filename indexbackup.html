@@ -16,7 +16,24 @@ overflow: hidden; /* Keeps the ripple effect contained */
 border-radius: 8px;
 transition: all 0.2s ease;
 }
+#clear-filter-btn {
+    position: fixed;
+     top : 100px;
+    right: 25px;
+background: var(--button-primary);
+color: var(--bg-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition);
+}
 
+#clear-filter-btn:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-hover);
+background: var(--button-hover);
+}
 /* Fix for visible corners during touch */
 .btn::after {
 content: '';
@@ -128,7 +145,7 @@ color: var(--card-text);
 }
 
 .card-detail {
-  margin-bottom: 15px;
+  margin-bottom: 55px;
   color: var(--text-light);
   line-height: 1.5;
 }
@@ -136,7 +153,7 @@ color: var(--card-text);
 .card-meta {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   font-size: 0.9rem;
 }
 
@@ -164,7 +181,7 @@ transition: filter 0.3s ease;
 }
 
 .card:hover .slide {
-filter: grayscale(80%);
+filter: contrast(150%) brightness(120%);
 }
 
 /* Base Styles */
@@ -728,7 +745,8 @@ background: rgba(255, 255, 255, 0.05);
         </footer>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+
+document.addEventListener('DOMContentLoaded', function() {
     // Set current year
     document.getElementById('year').textContent = new Date().getFullYear();
     
@@ -779,8 +797,30 @@ background: rgba(255, 255, 255, 0.05);
                     createProductCard(Object.values(product), index);
                 });
                 
+                if (products.length === 0) {
+                    cardsContainer.innerHTML = '<p>No products available.</p>';
+                }
+                
                 // Hide the spinner after data has been loaded
                 loadingElement.style.display = 'none';
+                
+                // Show clear filter button
+                const clearFilterBtn = document.getElementById('clear-filter-btn');
+                if (!clearFilterBtn) {
+                    const btn = document.createElement('button');
+                    btn.id = 'clear-filter-btn';
+                    btn.textContent = 'Show All';
+                    btn.onclick = function() {
+                        const cards = document.querySelectorAll('.card');
+                        cards.forEach(card => {
+                            card.style.display = 'block';
+                        });
+                        btn.style.display = 'none';
+                    };
+                    cardsContainer.appendChild(btn);
+                } else {
+                    clearFilterBtn.style.display = 'block';
+                }
             })
             .catch(error => {
                 console.error('Error fetching TSV data:', error);
@@ -817,6 +857,11 @@ background: rgba(255, 255, 255, 0.05);
 
     // Create product card element
     function createProductCard(columns, index) {
+        // Check if product has required data
+        if (!columns[0] || !columns[1] || !columns[2]) {
+            return; // Skip empty products
+        }
+
         const cardsContainer = document.getElementById('cardsContainer');
         const card = document.createElement('div');
         card.className = 'card';
@@ -959,23 +1004,27 @@ background: rgba(255, 255, 255, 0.05);
         }
     }
 
-function filterProducts(category) {
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const cardCategory = card.querySelector('.timestamp').textContent.trim().toLowerCase();
-        const cardSubCategory = card.querySelector('.card-footer .category-btn').textContent.trim().toLowerCase();
+    function filterProducts(category) {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const cardCategory = card.querySelector('.timestamp').textContent.trim().toLowerCase();
+            const cardSubCategory = card.querySelector('.card-footer .category-btn').textContent.trim().toLowerCase();
+            
+            if (cardCategory.includes(category.toLowerCase()) || cardSubCategory.includes(category.toLowerCase())) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            } 
+        });
         
-        if (cardCategory.includes(category.toLowerCase()) || cardSubCategory.includes(category.toLowerCase())) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        } 
-    });
-}
+        const clearFilterBtn = document.getElementById('clear-filter-btn');
+        clearFilterBtn.style.display = 'block';
+    }
 
     // Initial data load
     loadData();
 });
+        
     </script>
 </body>
 </html>
